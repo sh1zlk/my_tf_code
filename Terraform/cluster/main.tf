@@ -10,8 +10,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     vm_size    = "Standard_D2_v2"
   }
 
-
-
   identity {
     type = "SystemAssigned"
   }
@@ -34,6 +32,5 @@ resource "azurerm_kubernetes_cluster_node_pool" "nodepool_stop" {
   node_taints = [
     "kubernetes.azure.com/scalesetpriority=spot:NoSchedule"
   ]
-
 
 }
