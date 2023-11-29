@@ -17,9 +17,18 @@ resource "azurerm_resource_group" "rg" {
   location = var.rg_location
 }
 
-module "cluster" {
-  source = "./cluster"
+module "network" {
+  source = "./network"
   rg_name = var.rg_name
   rg_location = var.rg_location
   depends_on = [ azurerm_resource_group.rg ]
 }
+
+module "cluster" {
+  source = "./cluster"
+  rg_name = var.rg_name
+  rg_location = var.rg_location
+  subnet_id = module.network.subnet_id
+  depends_on = [ azurerm_resource_group.rg, module.network ]
+}
+

@@ -3,11 +3,13 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   resource_group_name = var.rg_name
   location = var.rg_location
   dns_prefix = "aks1"
+  
 
   default_node_pool {
     name       = "default"
     node_count = var.default_node_count
     vm_size    = "Standard_D2_v2"
+    vnet_subnet_id = var.subnet_id
   }
 
   identity {

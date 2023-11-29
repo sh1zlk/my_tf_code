@@ -26,4 +26,7 @@ variable "spot_node_count" {
   default = 1
 }
 
-
+variable "subnet_id" {
+  description = "Id of network"
+  type = string
+}
