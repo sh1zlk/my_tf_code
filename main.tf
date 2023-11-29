@@ -32,3 +32,8 @@ module "cluster" {
   depends_on = [ azurerm_resource_group.rg, module.network ]
 }
 
+module "database" {
+  source = "./database"
+  rg_name = var.rg_name
+  rg_location = var.rg_location
+}
