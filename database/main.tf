@@ -1,10 +1,27 @@
-resource "azurerm_mysql_server" "db" {
-  name                = "example-mysqlserver"
+resource "random_password" "password" {
+  length = 16
+  special = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+data "azurerm_key_vault" "key_vault" {
+  name = "front-shop-kv"
+  resource_group_name = var.rg_name
+}
+
+resource "azurerm_key_vault_secret" "db-pass" {
+  name = "db-pass"
+  key_vault_id = data.azurerm_key_vault.key_vault.id
+  value = random_password.password.result
+}
+
+resource "azurerm_mysql_server" "db_server" {
+  name                = "front-shop-mysqlserver"
   location            = var.rg_location
   resource_group_name = var.rg_name
 
-  administrator_login          = "mysqladminun"
-  administrator_login_password = "H@Sh1CoR3!"
+  administrator_login          = var.adm_login
+  administrator_login_password = random_password.password.result
 
   sku_name   = "B_Gen5_2"
   storage_mb = 5120
@@ -19,3 +36,23 @@ resource "azurerm_mysql_server" "db" {
   ssl_minimal_tls_version_enforced  = "TLS1_2"
 }
 
+resource "azurerm_mssql_database" "mysql_db" {
+  name                  = "frontshop-db"
+  server_id             = azurerm_mysql_server.db_server.id
+  collation             = "SQL_Latin1_General_CP1_CI_AS"
+  license_type          = "BasePrice"
+  max_size_gb           = 30
+  storage_account_type  = "Local"
+  sku_name              = "S0"
+  zone_redundant        = false
+}
+
+resource "azurerm_mssql_virtual_network_rule" "db_rule" {
+  name = "mssql-rule"
+  server_id = azurerm_mysql_server.db_server.id
+  subnet_id = var.subnet_id
+}
+
+output "db_pass" {
+  value = random_password.password.result
+}
