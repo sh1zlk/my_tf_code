@@ -7,4 +7,10 @@ provider "aws" {
 
 module "network" {
   source = "./network"
+  environment = var.environment
+}
+
+module "storage" {
+  source = "./storage"
+  environment = var.environment
 }
