@@ -26,7 +26,6 @@ resource "aws_nat_gateway" "nat" {
 }
 
 resource "aws_eip" "nat_eip" {
-    vpc = true
     depends_on = [ aws_internet_gateway.gw ]
 }
 
@@ -87,17 +86,54 @@ resource "aws_route53_zone" "main" {
   }
 }
 
-resource "aws_cloudfront_origin_access_control" "example" {
-  name                              = "example"
-  description                       = "Example Policy"
+resource "aws_cloudfront_origin_access_control" "origin_access" {
+  name                              = "cloudfront_access"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
 }
 
-resource "aws_cloudfront_distribution" "name" {
-  origin {
-    domain_name = var.domain_name
+locals {
+  s3_origin_id = "myS3Origin"
+}
 
+resource "aws_cloudfront_distribution" "cloudfront" {
+  origin {
+    domain_name = var.s3_domain_name
+    origin_access_control_id = aws_cloudfront_origin_access_control.origin_access.id
+    origin_id = local.s3_origin_id
   }
+
+  enabled = true
+  is_ipv6_enabled = true
+  default_root_object = "index.html"
+
+  # aliases = ["frontshop.tech"]
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+      locations = []
+    }
+  }
+
+  default_cache_behavior {
+    allowed_methods = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT" ]
+    cached_methods = ["GET", "HEAD"]
+    target_origin_id = local.s3_origin_id
+    forwarded_values {
+      query_string = false
+
+      cookies {
+        forward = "none"
+      }
+    }
+    
+    viewer_protocol_policy = "allow-all"
+  }
+
+  viewer_certificate {
+    cloudfront_default_certificate = true
+  }
+
 }

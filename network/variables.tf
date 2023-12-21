@@ -1,8 +1,9 @@
 variable "environment" {
   description = "Name of environment"
+  type = string
 }
 
-variable "domain_name" {
+variable "s3_domain_name" {
   description = "Domain Name"
-  default = "frontshop.tech"
+  type = string
 }

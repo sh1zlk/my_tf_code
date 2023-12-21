@@ -7,9 +7,11 @@ variable "subnet_name" {
   type = string
 }
 
-variable "asgroup_arn" {
-  type = string
+
+variable "private_id" {
+  
 }
 
-# variable "security_group_name" {
-# }
+variable "public_id" {
+  
+}
