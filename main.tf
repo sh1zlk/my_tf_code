@@ -33,4 +33,6 @@ module "as_group" {
   subnet_name = module.network.private_sub_name
   private_id = module.network.private_sub
   public_id = module.network.public_sub
+  cluster_name = module.cluster.cluste_name
+  vpc_id = module.network.vpc_id
 }

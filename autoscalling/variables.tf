@@ -15,3 +15,11 @@ variable "private_id" {
 variable "public_id" {
   
 }
+
+variable "cluster_name" {
+  
+}
+
+variable "vpc_id" {
+  
+}

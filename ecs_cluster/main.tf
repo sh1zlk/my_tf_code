@@ -3,13 +3,14 @@ module "ecs_cluster" {
 
   cluster_name = "${var.environment}-cluster"
   
+  default_capacity_provider_use_fargate = false
   autoscaling_capacity_providers = {
-    one = {
-      auto_scaling_group_arn         = "arn:aws:autoscaling:eu-central-1:099036503771:autoScalingGroup:51c46f4a-1e0b-4c9e-8889-5fbb9bcd2707:autoScalingGroupName/front-shop20231220213547116000000001"
+    ex_1 = {
+      auto_scaling_group_arn         = "${var.asgroup_arn}"
       managed_termination_protection = "ENABLED"
 
       managed_scaling = {
-        maximum_scaling_step_size = 5
+        maximum_scaling_step_size = 2
         minimum_scaling_step_size = 1
         status                    = "ENABLED"
         target_capacity           = 60
