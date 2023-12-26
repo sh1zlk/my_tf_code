@@ -86,6 +86,30 @@ resource "aws_route53_zone" "main" {
   }
 }
 
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "frontshop.tech"
+  validation_method = "DNS"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_route53_record" "cert_validation" {
+  name = tolist(aws_acm_certificate.cert.domain_validation_options)[0].resource_record_name
+  type    = tolist(aws_acm_certificate.cert.domain_validation_options)[0].resource_record_type
+  zone_id = aws_route53_zone.main.zone_id
+  records = [ tolist(aws_acm_certificate.cert.domain_validation_options)[0].resource_record_value ]
+
+  ttl = 60
+}
+
+resource "aws_acm_certificate_validation" "cert" {
+  certificate_arn         = aws_acm_certificate.cert.arn
+  validation_record_fqdns = [aws_route53_record.cert_validation.fqdn]
+}
+
+
 resource "aws_cloudfront_origin_access_control" "origin_access" {
   name                              = "cloudfront_access"
   origin_access_control_origin_type = "s3"
@@ -133,7 +157,26 @@ resource "aws_cloudfront_distribution" "cloudfront" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
+    # cloudfront_default_certificate = true
+    acm_certificate_arn = aws_acm_certificate.cert.arn
+    ssl_support_method  = "sni-only"
+  }
+
+  custom_error_response {
+    error_caching_min_ttl = 300
+    error_code = 403
+    response_code = 200
+    response_page_path = "/index.html"
+  }
+
+    custom_error_response {
+    error_caching_min_ttl = 300
+    error_code = 404
+    response_code = 200
+    response_page_path = "/index.html"
   }
 
 }
+
+
+
